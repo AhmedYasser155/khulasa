@@ -1,0 +1,14 @@
+fastapi
+uvicorn[standard]
+python-multipart
+groq
+openai
+yt-dlp
+ffmpeg-python
+opencv-python-headless
+mediapipe
+pyarabic
+python-bidi
+supabase
+boto3
+pydantic-settings
