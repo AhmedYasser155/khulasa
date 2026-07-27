@@ -42,8 +42,8 @@ from mediapipe.tasks import python as mp_python
 from mediapipe.tasks.python import vision as mp_vision
 
 # --- Hardcoded input/output. Change these to test different files. ---
-SOURCE_VIDEO_PATH = r"C:\Users\aayasser\Desktop\PLAYGROUND\khulasa\playground\tests\media\sample.mp4"
-OUTPUT_VIDEO_PATH = r"C:\Users\aayasser\Desktop\PLAYGROUND\khulasa\playground\tests\media\sample_split_screen.mp4"
+SOURCE_VIDEO_PATH = r"C:\Users\aayasser\Desktop\PLAYGROUND\zatoona\playground\tests\media\sample_1min.mp4"
+OUTPUT_VIDEO_PATH = r"C:\Users\aayasser\Desktop\PLAYGROUND\zatoona\playground\tests\media\sample_1min_split_screen.mp4"
 
 SAMPLE_INTERVAL_SEC = 1.0
 OUTPUT_WIDTH = 1080

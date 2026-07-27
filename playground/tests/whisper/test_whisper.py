@@ -21,7 +21,7 @@ Usage:
 
     python test_whisper_arabic.py
 
-Edit AUDIO_PATH below to point at your file.
+Edit SOURCE_PATH below to point at your file (audio or video).
 """
 
 import os
@@ -34,13 +34,47 @@ from dotenv import load_dotenv
 
 load_dotenv()
 
-# --- Hardcoded input path. Change this to test a different file/dialect. ---
-AUDIO_PATH = r"C:\Users\aayasser\Desktop\PLAYGROUND\khulasa\playground\tests\whisper\final.mp3"
+# --- Hardcoded input path. Can be an audio file OR a video file --
+# --- if it's a video, audio is extracted automatically first. ---
+SOURCE_PATH = r"C:\Users\aayasser\Desktop\PLAYGROUND\zatoona\playground\tests\media\sample_1min.mp4"
+
+VIDEO_EXTENSIONS = {".mp4", ".mov", ".mkv", ".avi", ".webm", ".m4v"}
 
 # Groq's hard limit is 25MB. Stay comfortably under it.
 MAX_UPLOAD_BYTES = 24 * 1024 * 1024
 CHUNK_DURATION_SEC = 600           # 10 minutes per chunk
 CHUNK_BITRATE = "64k"              # mono, 64kbps -> ~4.8MB per 10-min chunk, safely under the cap
+
+
+def extract_audio_from_video(video_path: str) -> str:
+    """
+    Pulls just the audio track out of a video file into a standalone
+    mp3. Much faster than sending the whole video through, since
+    there's no video stream to decode/transfer at all.
+    """
+    audio_path = os.path.splitext(video_path)[0] + "_extracted_audio.mp3"
+    cmd = [
+        "ffmpeg", "-y",
+        "-i", video_path,
+        "-vn",                  # drop video stream entirely
+        "-acodec", "libmp3lame",
+        "-q:a", "2",             # good quality, reasonable file size
+        audio_path,
+    ]
+    print(f"Extracting audio from video: {video_path}")
+    result = subprocess.run(cmd, capture_output=True, text=True)
+    if result.returncode != 0:
+        raise RuntimeError(f"Audio extraction failed:\n{result.stderr[-1500:]}")
+    print(f"Audio extracted to: {audio_path}\n")
+    return audio_path
+
+
+def resolve_audio_path(source_path: str) -> str:
+    """Returns a usable audio file path, extracting from video first if needed."""
+    ext = os.path.splitext(source_path)[1].lower()
+    if ext in VIDEO_EXTENSIONS:
+        return extract_audio_from_video(source_path)
+    return source_path
 
 
 def get_audio_duration_sec(path: str) -> float:
@@ -145,16 +179,18 @@ def transcribe_arabic(audio_path: str) -> dict:
 
 
 def main():
-    if not os.path.isfile(AUDIO_PATH):
-        print(f"File not found: {AUDIO_PATH}")
+    if not os.path.isfile(SOURCE_PATH):
+        print(f"File not found: {SOURCE_PATH}")
         return
 
     if not os.environ.get("GROQ_API_KEY"):
         print("GROQ_API_KEY is not set. Run: $env:GROQ_API_KEY = \"your_key_here\"")
         return
 
-    print(f"Transcribing: {AUDIO_PATH} ...\n")
-    result = transcribe_arabic(AUDIO_PATH)
+    audio_path = resolve_audio_path(SOURCE_PATH)
+
+    print(f"Transcribing: {audio_path} ...\n")
+    result = transcribe_arabic(audio_path)
 
     print("\n" + "=" * 60)
     print("FULL TEXT:")
