@@ -35,7 +35,7 @@ load_dotenv()
 
 # --- Hardcoded input. Change this to test a different file. ---
 TEST_FILE_PATH = r"E:\FFOutput\1.mp3"
-OBJECT_KEY = "test-uploads/1.mp3"   # where it will land inside the bucket
+OBJECT_KEY = "test-uploads2/1.mp3"   # where it will land inside the bucket
 
 ACCOUNT_ID = os.environ.get("R2_ACCOUNT_ID")
 ACCESS_KEY = os.environ.get("R2_ACCESS_KEY_ID")

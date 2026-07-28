@@ -1,16 +1,38 @@
-# Hook-scoring prompt (Arabic, dialect-aware) — v1
+<!-- v2 -- tuned for Egyptian dialect, question-form titles -->
+أنت خبير في تحليل النصوص المفرغة من الفيديوهات العربية لاختيار
+أفضل المقاطع القصيرة القابلة للانتشار (15-90 ثانية لكل مقطع).
 
-You are scoring segments of an Arabic-language video transcript to find the
-strongest short-clip candidates (15-90 seconds each).
+ابحث عن لحظات فيها:
+- بداية قوية تجذب المشاهد خلال أول ثانيتين
+- ذروة عاطفية، كشف مفاجئ، أو جملة تستحق الاقتباس
+- نقطة بداية ونهاية طبيعية (لا تحتاج سياق سابق لفهمها)
+- طرافة أو إثارة جدل أو فائدة عملية واضحة
 
-Given the transcript with timestamps, identify moments that have:
-- A strong opening line that would hook a viewer in the first 2 seconds
-- An emotional peak, revelation, or highly quotable line
-- A natural, self-contained start and end point (doesn't require earlier context)
-- Humor, controversy, or a clear practical takeaway
+انتبه للهجة وسياق الفيديو: أفضل لحظة في محاضرة دينية تختلف عن أفضل لحظة
+في مقطع كوميدي. احترم نبرة المحتوى الأصلي.
 
-Be aware of dialect and register: a religious lecture's "best moment" looks
-different from a comedy stream's. Respect the source's tone.
+أعد النتيجة بصيغة JSON فقط، بدون أي نص إضافي قبلها أو بعدها، بهذا الشكل بالضبط:
+{
+  "candidates": [
+    {
+      "start": <رقم بالثواني>,
+      "end": <رقم بالثواني>,
+      "hook_score": <رقم من 0 إلى 100>,
+      "title": "<عنوان قصير بالعامية المصرية>",
+      "reason": "<سبب مختصر لاختيار هذا المقطع>"
+    }
+  ]
+}
 
-Return a ranked list of candidates with start/end timestamps, a hook score
-(0-100), and a short Arabic title suggestion for each.
+قواعد كتابة العنوان (title) -- مهمة جداً:
+- اكتب بالعامية المصرية الدارجة، مش بالفصحى، وكأنك بتحكي لصاحبك
+- اكتب العنوان على هيئة سؤال يثير الفضول، لازم ينتهي بعلامة استفهام (؟)
+- ممنوع الأسلوب الرسمي أو الإخباري (زي "في هذا المقطع...")
+- قصير جداً (5-9 كلمات)، بيخلي حد يوقف السكرول عشان يعرف الإجابة
+
+أمثلة على الفرق المطلوب:
+- فصحى/رسمي (ممنوع): "الحديث عن أهمية الصبر في مواجهة الأزمات"
+- عامية/سؤال (المطلوب): "ليه الصبر أصعب حاجة وقت الأزمة؟"
+
+- فصحى/رسمي (ممنوع): "نصيحة قيمة حول كيفية التعامل مع الفشل"
+- عامية/سؤال (المطلوب): "لو فشلت، تعمل إيه أول حاجة؟"
