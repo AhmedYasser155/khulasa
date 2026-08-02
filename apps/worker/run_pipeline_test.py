@@ -20,7 +20,7 @@ from app.pipeline.orchestrator import run_pipeline
 
 # Point this at a real, short test video (reuse one from your earlier
 # standalone testing -- 20-60 seconds is plenty for this smoke test).
-SOURCE_VIDEO_PATH = r"C:\Users\aayasser\Desktop\PLAYGROUND\zatoona\playground\tests\media\sample_5min.mp4"
+SOURCE_VIDEO_PATH = r"C:\Users\aayasser\Desktop\PLAYGROUND\zatoona\playground\tests\media\sample_quran_verse.mp4"
 
 
 def main():

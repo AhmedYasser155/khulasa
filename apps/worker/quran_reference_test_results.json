@@ -1,0 +1,259 @@
+{
+  "total_ayat_loaded": 6236,
+  "correct": 11,
+  "scored_cases": 11,
+  "results": [
+    {
+      "input": "قل اعوذ برب الفلق",
+      "note": "full ayah",
+      "expected": [
+        [
+          113,
+          1
+        ]
+      ],
+      "match": {
+        "surah_id": 113,
+        "surah_name": "الفلق",
+        "ayah_id": 1,
+        "text": "قُلۡ أَعُوذُ بِرَبِّ ٱلۡفَلَقِ",
+        "score": 1.0
+      },
+      "status": "CORRECT"
+    },
+    {
+      "input": "من شر ما خلق",
+      "note": "full ayah",
+      "expected": [
+        [
+          113,
+          2
+        ]
+      ],
+      "match": {
+        "surah_id": 113,
+        "surah_name": "الفلق",
+        "ayah_id": 2,
+        "text": "مِن شَرِّ مَا خَلَقَ",
+        "score": 1.0
+      },
+      "status": "CORRECT"
+    },
+    {
+      "input": "قل اعوذ برب الناس",
+      "note": "full ayah",
+      "expected": [
+        [
+          114,
+          1
+        ]
+      ],
+      "match": {
+        "surah_id": 114,
+        "surah_name": "الناس",
+        "ayah_id": 1,
+        "text": "قُلۡ أَعُوذُ بِرَبِّ ٱلنَّاسِ",
+        "score": 1.0
+      },
+      "status": "CORRECT"
+    },
+    {
+      "input": "من شر الوسواس الخناس",
+      "note": "full ayah",
+      "expected": [
+        [
+          114,
+          4
+        ]
+      ],
+      "match": {
+        "surah_id": 114,
+        "surah_name": "الناس",
+        "ayah_id": 4,
+        "text": "مِن شَرِّ ٱلۡوَسۡوَاسِ ٱلۡخَنَّاسِ",
+        "score": 1.0
+      },
+      "status": "CORRECT"
+    },
+    {
+      "input": "بسم الله الرحمن الرحيم",
+      "note": "Basmalah -- may or may not be separately indexed",
+      "expected": null,
+      "match": {
+        "surah_id": 1,
+        "surah_name": "الفاتحة",
+        "ayah_id": 1,
+        "text": "بِسۡمِ ٱللَّهِ ٱلرَّحۡمَٰنِ ٱلرَّحِيمِ",
+        "score": 0.9778
+      },
+      "status": "matched (expected none/ambiguous)"
+    },
+    {
+      "input": "من شر الوسواس",
+      "note": "PARTIAL -- cut before 'الخناس'",
+      "expected": [
+        [
+          114,
+          4
+        ]
+      ],
+      "match": {
+        "surah_id": 114,
+        "surah_name": "الناس",
+        "ayah_id": 4,
+        "text": "مِن شَرِّ ٱلۡوَسۡوَاسِ ٱلۡخَنَّاسِ",
+        "score": 1.0
+      },
+      "status": "CORRECT"
+    },
+    {
+      "input": "الذي يوسوس في صدور",
+      "note": "PARTIAL -- cut before 'الناس'",
+      "expected": [
+        [
+          114,
+          5
+        ]
+      ],
+      "match": {
+        "surah_id": 114,
+        "surah_name": "الناس",
+        "ayah_id": 5,
+        "text": "ٱلَّذِي يُوَسۡوِسُ فِي صُدُورِ ٱلنَّاسِ",
+        "score": 1.0
+      },
+      "status": "CORRECT"
+    },
+    {
+      "input": "له ما في السماوات وما في الارض",
+      "note": "PARTIAL -- this exact phrase appears identically in both 2:255 and 42:4; either is a correct citation",
+      "expected": [
+        [
+          2,
+          255
+        ],
+        [
+          42,
+          4
+        ]
+      ],
+      "match": {
+        "surah_id": 2,
+        "surah_name": "البقرة",
+        "ayah_id": 255,
+        "text": "ٱللَّهُ لَآ إِلَٰهَ إِلَّا هُوَ ٱلۡحَيُّ ٱلۡقَيُّومُۚ لَا تَأۡخُذُهُۥ سِنَةٞ وَلَا نَوۡمٞۚ لَّهُۥ مَا فِي ٱلسَّمَٰوَٰتِ وَمَا فِي ٱلۡأَرۡضِۗ مَن ذَا ٱلَّذِي يَشۡفَعُ عِندَهُۥٓ إِلَّا بِإِذۡنِهِۦۚ يَعۡلَمُ مَا بَيۡنَ أَيۡدِيهِمۡ وَمَا خَلۡفَهُمۡۖ وَلَا يُحِيطُونَ بِشَيۡءٖ مِّنۡ عِلۡمِهِۦٓ إِلَّا بِمَا شَآءَۚ وَسِعَ كُرۡسِيُّهُ ٱلسَّمَٰوَٰتِ وَٱلۡأَرۡضَۖ وَلَا يَـُٔودُهُۥ حِفۡظُهُمَاۚ وَهُوَ ٱلۡعَلِيُّ ٱلۡعَظِيمُ",
+        "score": 1.0
+      },
+      "status": "CORRECT"
+    },
+    {
+      "input": "ولم يكن له كفوا",
+      "note": "PARTIAL -- cut before 'احد'",
+      "expected": [
+        [
+          112,
+          4
+        ]
+      ],
+      "match": {
+        "surah_id": 112,
+        "surah_name": "الإخلاص",
+        "ayah_id": 4,
+        "text": "وَلَمۡ يَكُن لَّهُۥ كُفُوًا أَحَدُۢ",
+        "score": 1.0
+      },
+      "status": "CORRECT"
+    },
+    {
+      "input": "وهو العلي العظيم",
+      "note": "PARTIAL -- closing phrase shared identically by 2:255 and 42:4; either is a correct citation",
+      "expected": [
+        [
+          2,
+          255
+        ],
+        [
+          42,
+          4
+        ]
+      ],
+      "match": {
+        "surah_id": 42,
+        "surah_name": "الشورى",
+        "ayah_id": 4,
+        "text": "لَهُۥ مَا فِي ٱلسَّمَٰوَٰتِ وَمَا فِي ٱلۡأَرۡضِۖ وَهُوَ ٱلۡعَلِيُّ ٱلۡعَظِيمُ",
+        "score": 1.0
+      },
+      "status": "CORRECT"
+    },
+    {
+      "input": "الله الصمد",
+      "note": "short full ayah",
+      "expected": [
+        [
+          112,
+          2
+        ]
+      ],
+      "match": {
+        "surah_id": 112,
+        "surah_name": "الإخلاص",
+        "ayah_id": 2,
+        "text": "ٱللَّهُ ٱلصَّمَدُ",
+        "score": 1.0
+      },
+      "status": "CORRECT"
+    },
+    {
+      "input": "لم يلد ولم يولد",
+      "note": "wasla-alif normalization check (ٱ in dataset)",
+      "expected": [
+        [
+          112,
+          3
+        ]
+      ],
+      "match": {
+        "surah_id": 112,
+        "surah_name": "الإخلاص",
+        "ayah_id": 3,
+        "text": "لَمۡ يَلِدۡ وَلَمۡ يُولَدۡ",
+        "score": 1.0
+      },
+      "status": "CORRECT"
+    },
+    {
+      "input": "فبأي الاء ربكما تكذبان",
+      "note": "REPEATED REFRAIN -- appears ~31x in Ar-Rahman (55), ayah number is genuinely ambiguous by design",
+      "expected": null,
+      "match": {
+        "surah_id": 55,
+        "surah_name": "الرحمن",
+        "ayah_id": 13,
+        "text": "فَبِأَيِّ ءَالَآءِ رَبِّكُمَا تُكَذِّبَانِ",
+        "score": 0.9778
+      },
+      "status": "matched (expected none/ambiguous)"
+    },
+    {
+      "input": "الرحمن الرحيم",
+      "note": "very short, likely ambiguous/ties with many ayat",
+      "expected": null,
+      "match": {
+        "surah_id": 1,
+        "surah_name": "الفاتحة",
+        "ayah_id": 3,
+        "text": "ٱلرَّحۡمَٰنِ ٱلرَّحِيمِ",
+        "score": 0.963
+      },
+      "status": "matched (expected none/ambiguous)"
+    },
+    {
+      "input": "الحمد لله على كل حال",
+      "note": "NEGATIVE CASE -- common phrase, NOT actual Quran wording",
+      "expected": null,
+      "match": null,
+      "status": "no match"
+    }
+  ]
+}

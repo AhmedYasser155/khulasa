@@ -22,7 +22,9 @@ import unicodedata
 
 import requests
 
-FONT_NAME = "Tajawal"
+FONT_NAME = "Arial"  # system font on Windows -- no download needed.
+                      # Switch back to "Tajawal" (with download below) if you
+                      # want the dedicated Arabic font instead.
 FONT_FILE = "Tajawal-Bold.ttf"
 FONT_URL = "https://raw.githubusercontent.com/googlefonts/tajawal/main/fonts/ttf/Tajawal-Bold.ttf"
 FONTS_DIR = os.path.abspath(os.path.join(os.path.dirname(__file__), "..", "..", "fonts"))
@@ -30,7 +32,11 @@ FONTS_DIR = os.path.abspath(os.path.join(os.path.dirname(__file__), "..", "..", 
 WORDS_PER_LINE = 4
 
 
-def _ensure_font_downloaded() -> str:
+def _ensure_font_downloaded() -> str | None:
+    """Only needed when FONT_NAME == 'Tajawal' -- Arial and other system
+    fonts are already installed and don't need fetching or a fontsdir."""
+    if FONT_NAME != "Tajawal":
+        return None
     os.makedirs(FONTS_DIR, exist_ok=True)
     font_path = os.path.join(FONTS_DIR, FONT_FILE)
     if os.path.isfile(font_path):
@@ -80,6 +86,7 @@ def _build_caption_lines(segments: list[dict], words_per_line: int) -> list[dict
         if not words:
             continue
         total = len(words)
+        content_type = seg.get("content_type", "normal")
 
         for i in range(0, total, words_per_line):
             chunk = words[i:i + words_per_line]
@@ -89,6 +96,7 @@ def _build_caption_lines(segments: list[dict], words_per_line: int) -> list[dict
                 "start": seg_start + frac_start * seg_duration,
                 "end": seg_start + frac_end * seg_duration,
                 "text": " ".join(chunk),
+                "content_type": content_type,
             })
 
     return lines
@@ -106,7 +114,21 @@ def _get_video_resolution(video_path: str) -> tuple[int, int]:
 
 
 def _write_ass(lines: list[dict], path: str, video_width: int, video_height: int):
-    """Native .ass file -- bypasses FFmpeg's SRT-to-ASS conversion path entirely."""
+    """
+    Native .ass file -- bypasses FFmpeg's SRT-to-ASS conversion path
+    entirely. Defines four styles so refine_transcript.py's
+    content_type classification can render Quran/Hadith/quotes
+    visually distinct from ordinary speech:
+      - Default: plain white, for normal speech
+      - Quran:   gold, bold -- distinct and respectful for scripture
+      - Hadith:  tan/warm color -- distinct from both Default and Quran
+      - Quote:   white, italic -- distinct from ordinary speech without
+                 implying religious weight
+    Colors are in ASS's &HAABBGGRR hex format (alpha, blue, green, red).
+    """
+    font_size = max(16, video_height // 20)
+    margin_v = video_height // 20
+
     header = f"""[Script Info]
 ScriptType: v4.00+
 PlayResX: {video_width}
@@ -115,17 +137,27 @@ ScaledBorderAndShadow: yes
 
 [V4+ Styles]
 Format: Name, Fontname, Fontsize, PrimaryColour, SecondaryColour, OutlineColour, BackColour, Bold, Italic, Underline, StrikeOut, ScaleX, ScaleY, Spacing, Angle, BorderStyle, Outline, Shadow, Alignment, MarginL, MarginR, MarginV, Encoding
-Style: Default,{FONT_NAME},{max(16, video_height // 20)},&H00FFFFFF,&H000000FF,&H00000000,&H00000000,0,0,0,0,100,100,0,0,1,2,0,2,10,10,{video_height // 20},1
+Style: Default,{FONT_NAME},{font_size},&H00FFFFFF,&H000000FF,&H00000000,&H00000000,0,0,0,0,100,100,0,0,1,2,0,2,10,10,{margin_v},1
+Style: Quran,{FONT_NAME},{font_size},&H0000D7FF,&H000000FF,&H00000000,&H00000000,1,0,0,0,100,100,0,0,1,2,0,2,10,10,{margin_v},1
+Style: Hadith,{FONT_NAME},{font_size},&H009CC1E6,&H000000FF,&H00000000,&H00000000,0,0,0,0,100,100,0,0,1,2,0,2,10,10,{margin_v},1
+Style: Quote,{FONT_NAME},{font_size},&H00FFFFFF,&H000000FF,&H00000000,&H00000000,0,1,0,0,100,100,0,0,1,2,0,2,10,10,{margin_v},1
 
 [Events]
 Format: Layer, Start, End, Style, Name, MarginL, MarginR, MarginV, Effect, Text
 """
+    style_by_type = {
+        "quran": "Quran",
+        "hadith": "Hadith",
+        "quote": "Quote",
+    }
+
     with open(path, "w", encoding="utf-8") as f:
         f.write(header)
         for line in lines:
             start = _seconds_to_ass_timestamp(line["start"])
             end = _seconds_to_ass_timestamp(line["end"])
-            f.write(f"Dialogue: 0,{start},{end},Default,,0,0,0,,{line['text']}\n")
+            style = style_by_type.get(line.get("content_type", "normal"), "Default")
+            f.write(f"Dialogue: 0,{start},{end},{style},,0,0,0,,{line['text']}\n")
 
 
 def _filter_and_shift_segments(segments: list[dict], clip_start: float, clip_end: float) -> list[dict]:
@@ -200,7 +232,14 @@ def burn_in_captions(video_path: str, transcript: dict, output_path: str,
         fonts_dir_arg = FONTS_DIR.replace("\\", "/")
         ass_arg, fonts_dir_arg = f"'{ass_arg}'", f"'{fonts_dir_arg}'"
 
-    vf = f"subtitles={ass_arg}:fontsdir={fonts_dir_arg}"
+    # fontsdir only matters for a custom downloaded font (Tajawal). System
+    # fonts like Arial are found automatically without needing it, and
+    # pointing fontsdir at a folder that doesn't contain Arial is harmless
+    # but unnecessary -- skip it in that case.
+    if FONT_NAME == "Tajawal":
+        vf = f"subtitles={ass_arg}:fontsdir={fonts_dir_arg}"
+    else:
+        vf = f"subtitles={ass_arg}"
 
     cmd = ["ffmpeg", "-y", "-i", video_path, "-vf", vf, output_path]
     result = subprocess.run(cmd, capture_output=True, text=True)

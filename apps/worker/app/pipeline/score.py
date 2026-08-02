@@ -16,6 +16,12 @@ from groq import Groq
 
 MODEL = "llama-3.3-70b-versatile"
 
+# The prompt asks the LLM for 15-90s clips, but that's just a text
+# instruction with nothing stopping it from returning something
+# outside that range. These constants are the actual enforcement.
+MIN_CLIP_DURATION_SEC = 15.0
+MAX_CLIP_DURATION_SEC = 90.0
+
 # Adjust this if your actual folder depth differs from the scaffolded structure:
 # apps/worker/app/pipeline/score.py -> up 4 levels -> repo root -> packages/prompts/...
 PROMPT_PATH = Path(__file__).resolve().parents[4] / "packages" / "prompts" / "arabic" / "hook_scoring.md"
@@ -60,5 +66,15 @@ def score_clip_candidates(transcript: dict) -> list[dict]:
 
     result = json.loads(response.choices[0].message.content)
     candidates = result.get("candidates", [])
-    candidates.sort(key=lambda c: c.get("hook_score", 0), reverse=True)
-    return candidates
+
+    valid_candidates = []
+    for c in candidates:
+        duration = c.get("end", 0) - c.get("start", 0)
+        if MIN_CLIP_DURATION_SEC <= duration <= MAX_CLIP_DURATION_SEC:
+            valid_candidates.append(c)
+        else:
+            print(f"  Dropping candidate outside {MIN_CLIP_DURATION_SEC}-{MAX_CLIP_DURATION_SEC}s "
+                  f"range (was {duration:.1f}s): {c.get('title', '')}")
+
+    valid_candidates.sort(key=lambda c: c.get("hook_score", 0), reverse=True)
+    return valid_candidates

@@ -10,7 +10,7 @@ import os
 import uuid
 
 from app.core import jobs, storage
-from app.pipeline import ingest, transcribe, score, render, captions
+from app.pipeline import ingest, transcribe, refine_transcript, score, render, captions
 
 TMP_DIR = "tmp"
 
@@ -37,11 +37,14 @@ def run_pipeline(job_id: str, source_path: str):
         audio_path = ingest.resolve_audio_path(local_path)
         transcript = transcribe.transcribe_arabic(audio_path)
 
+        jobs.update_job(job_id, status="refining")
+        # verify_quran=True -- validated against 15 test cases (full quotes,
+        # partial quotes, a repeated-refrain stress test, and a negative
+        # case) in test_quran_reference.py before enabling this.
+        transcript = refine_transcript.refine_transcript(transcript, verify_quran=True)
 
         jobs.update_job(job_id, status="scoring")
         candidates = score.score_clip_candidates(transcript)
-        print(f"Found {len(candidates)} clip candidates for job {job_id}"  )
-
         if not candidates:
             jobs.update_job(job_id, status="failed", error="No clip candidates found")
             return
