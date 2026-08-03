@@ -7,16 +7,25 @@ Migrated from test_whisper_arabic.py's video-to-audio extraction
 logic (that script's SOURCE_PATH / VIDEO_EXTENSIONS / resolve_audio_path
 mechanism), now parameterized instead of hardcoded.
 
-yt-dlp based YouTube ingestion is a placeholder -- we never actually
-tested this piece end-to-end, unlike everything else in this pipeline.
-Treat it as unverified until it gets the same "test standalone first"
-treatment the rest of the pipeline got.
+yt-dlp based YouTube ingestion (ingest_from_youtube) has been tested
+standalone via test_yt_dlp_ingest.py and confirmed working.
 """
 
 import os
+import re
 import subprocess
 
 VIDEO_EXTENSIONS = {".mp4", ".mov", ".mkv", ".avi", ".webm", ".m4v"}
+
+_YOUTUBE_URL_PATTERN = re.compile(
+    r"^https?://(www\.)?(youtube\.com/watch\?v=|youtu\.be/|youtube\.com/shorts/)",
+    re.IGNORECASE,
+)
+
+
+def is_youtube_url(source: str) -> bool:
+    """Used by the orchestrator to decide whether a job's source needs downloading via yt-dlp first."""
+    return bool(_YOUTUBE_URL_PATTERN.match(source.strip()))
 
 
 def extract_audio_from_video(video_path: str) -> str:
@@ -48,12 +57,24 @@ def ingest_from_youtube(url: str, output_dir: str = "tmp") -> str:
     """
     Downloads a YouTube video with yt-dlp, returns local file path.
 
-    NOT YET TESTED END-TO-END. Test this standalone (same way every
-    other pipeline stage was tested) before relying on it in a real job.
+    Format selector requests best mp4 video + best m4a audio and lets
+    yt-dlp merge them via ffmpeg (which is already installed for the
+    rest of this pipeline) -- more robust than requiring a single
+    pre-merged mp4 stream, since many videos only offer separate
+    video/audio streams.
+
+    Tested standalone via test_yt_dlp_ingest.py and confirmed working.
     """
     os.makedirs(output_dir, exist_ok=True)
     output_template = os.path.join(output_dir, "%(id)s.%(ext)s")
-    cmd = ["yt-dlp", "-f", "mp4", "--print", "after_move:filepath", "-o", output_template, url]
+    cmd = [
+        "yt-dlp",
+        "-f", "bestvideo[ext=mp4]+bestaudio[ext=m4a]/best[ext=mp4]/best",
+        "--merge-output-format", "mp4",
+        "--print", "after_move:filepath",
+        "-o", output_template,
+        url,
+    ]
     result = subprocess.run(cmd, capture_output=True, text=True)
     if result.returncode != 0:
         raise RuntimeError(f"yt-dlp download failed:\n{result.stderr[-1500:]}")

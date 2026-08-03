@@ -21,7 +21,9 @@ import os
 from dotenv import load_dotenv
 load_dotenv()
 
-from app.pipeline.refine_transcript import refine_transcript  # adjust import if run outside apps/worker
+from app.pipeline.refine_transcript import refine_transcript 
+
+
 
 TRANSCRIPT_JSON_PATH = "transcription_result.json"
 

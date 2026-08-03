@@ -19,8 +19,8 @@ def run_pipeline(job_id: str, source_path: str):
     """
     source_path can be:
       - a local file path (video or audio) -- used directly
-      - an R2 object key -- downloaded first via storage.download_to_local
-    Extend this dispatch once YouTube ingestion is actually tested.
+      - an R2 object key, prefixed "r2://" -- downloaded first via storage.download_to_local
+      - a YouTube URL -- downloaded first via ingest.ingest_from_youtube
     """
     try:
         os.makedirs(TMP_DIR, exist_ok=True)
@@ -30,6 +30,8 @@ def run_pipeline(job_id: str, source_path: str):
             key = source_path.replace("r2://", "")
             local_path = os.path.join(TMP_DIR, os.path.basename(key))
             storage.download_to_local(key, local_path)
+        elif ingest.is_youtube_url(source_path):
+            local_path = ingest.ingest_from_youtube(source_path, output_dir=TMP_DIR)
         else:
             local_path = source_path
 
